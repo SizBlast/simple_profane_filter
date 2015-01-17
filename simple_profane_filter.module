@@ -10,7 +10,6 @@
  * @param $arg
  *      Array that holds the curren path as returned from arg() function
  */
-
 function simple_profane_filter_help($path, $arg) {
     $output = '';
     switch ($path) {
@@ -22,4 +21,59 @@ function simple_profane_filter_help($path, $arg) {
             $output .= '<p>' . t('The Simple Profane Filter module provides a custom filter to replace any profane word with some random characters. This module is an extension of the <a href="@filter">Filter</a> module.', array('@filter' => url('admin/help/filter'))) . '</p>';
             return $output;
     }
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function simple_profane_filter_block_info() {
+    $blocks['simple_profane_filter'] = array(
+      // The name that will appear in the block list.
+      'info' => t('Filtered profane words'),
+    );
+    return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ * 
+ * Prepares the contents of the block.
+ */
+function simple_profane_filter_block_view($delta = '') {
+    $block = array();
+    switch ($delta) {
+        case 'simple_profane_filter':
+            $block['subject'] = t('Filtered profane words');
+            if (user_access('view profane words')) {
+                // Use our custom function to retrieve data.
+                // $result = simple_profane_filter_contents();
+                $result = array(); // Use this because there isn't a table yet.
+                // No profane words defined.
+                if (empty($result)) {
+                    $block['content'] = t('No profane words defined.');
+                }
+                else {
+                    // Pas data through theme function.
+                    $block['content'] = theme('item_list', array('words' => $result));
+                }
+            }
+            break;
+    }
+    return $block;
+}
+
+/**
+ * Custom content function
+ * 
+ * Retrieves all the profane words fromt the database.
+ * 
+ * @return
+ *      A result set of the profane words.
+ */
+function simple_profane_filter_contents() {
+    $query = db_select('profane_words', 'p')
+        ->fields('p', array('pid','word'))
+        ->orderBy('word', 'ASC') // Alphabetically
+        ->execute();
+    return $query;
 }
