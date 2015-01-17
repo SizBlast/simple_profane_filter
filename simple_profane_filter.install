@@ -5,7 +5,7 @@
  * 
  * Used for adding new tables to the database.
  */
-function simple_profane_filter_schema() {
+function simple_profane_filter_schema(){
     $schema['profane_words'] = array(
       'description' => 'Stores the profane words defined by the administrator.',
       'fields' => array(
@@ -31,7 +31,7 @@ function simple_profane_filter_schema() {
 /**
  * Implements hook_install().
  */
-function simple_profane_filter_install() {
+function simple_profane_filter_install(){
     // Create the tables.
     drupal_install_schema('profane_words');
 }
@@ -39,7 +39,7 @@ function simple_profane_filter_install() {
 /**
  * Implements hook_uninstall().
  */
-function simple_profane_filter_uninstall() {
+function simple_profane_filter_uninstall(){
     // Drop the tables.
     drupal_uninstall_schema('profane_words');
 }

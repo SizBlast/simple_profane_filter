@@ -10,15 +10,22 @@
  * @param $arg
  *      Array that holds the curren path as returned from arg() function
  */
-function simple_profane_filter_help($path, $arg) {
+function simple_profane_filter_help($path, $arg){
     $output = '';
     switch ($path) {
         case 'admin/help#simple_profane_filter': // Help page
-            $output .= '<p>' . t('The Simple Profane Filter module provides a custom filter to replace any profane word with some random characters. This module is an extension of the <a href="@filter">Filter</a> module.', array('@filter' => url('admin/help/filter'))) . '</p>';
+            $output .= '<p>' . t('The Simple Profane Filter module provides a custom filter to replace any profane word with some random characters.') . '</p>';
             $output .= '<p>' . t('The Simple Profane Filter <a href="@settings">settings page</a> allows the administrator to define the words that are not welcome on the website.', array('@settings' => url('admin/config/content/simple_profane_filter'))) . '</p>';
             return $output;
         case 'admin/config/content/simple_profane_filter': // Settings page
-            $output .= '<p>' . t('The Simple Profane Filter module provides a custom filter to replace any profane word with some random characters. This module is an extension of the <a href="@filter">Filter</a> module.', array('@filter' => url('admin/help/filter'))) . '</p>';
+            $output .= '<p>' . t('The Simple Profane Filter module provides a custom filter to replace any profane word with some random characters.') . '</p>';
+            $words = '';
+            $query = simple_profane_filter_contents();
+            foreach ($query as $word) {
+                $words .= '<li>' . $word->word . '</li>';
+            }
+            $output .= '<label>List of filtered profane words:</label>';
+            $output .= '<ul>'. $words . '</ul>';
             return $output;
     }
 }
@@ -26,7 +33,7 @@ function simple_profane_filter_help($path, $arg) {
 /**
  * Implements hook_block_info().
  */
-function simple_profane_filter_block_info() {
+function simple_profane_filter_block_info(){
     $blocks['simple_profane_filter'] = array(
       // The name that will appear in the block list.
       'info' => t('Filtered profane words'),
@@ -39,22 +46,29 @@ function simple_profane_filter_block_info() {
  * 
  * Prepares the contents of the block.
  */
-function simple_profane_filter_block_view($delta = '') {
+function simple_profane_filter_block_view($delta = ''){
     $block = array();
     switch ($delta) {
         case 'simple_profane_filter':
             $block['subject'] = t('Filtered profane words');
             if (user_access('view profane words')) {
                 // Use our custom function to retrieve data.
-                // $result = simple_profane_filter_contents();
-                $result = array(); // Use this because there isn't a table yet.
+                $result = simple_profane_filter_contents();
+                //Array to contain items for the block to render.
+                $items = array();
+                //Iterate over the resultset and format as links.
+                foreach ($result as $word) {
+                    $items[] = array(
+                      'data' => $word->word,
+                    );
+                }
                 // No profane words defined.
-                if (empty($result)) {
+                if (empty($items)) {
                     $block['content'] = t('No profane words defined.');
                 }
                 else {
                     // Pas data through theme function.
-                    $block['content'] = theme('item_list', array('words' => $result));
+                    $block['content'] = theme('item_list', array('items' => $items));
                 }
             }
             break;
@@ -70,10 +84,85 @@ function simple_profane_filter_block_view($delta = '') {
  * @return
  *      A result set of the profane words.
  */
-function simple_profane_filter_contents() {
-    $query = db_select('profane_words', 'p')
-        ->fields('p', array('pid','word'))
+function simple_profane_filter_contents(){
+    $query = db_select('profane_words','p')
+        ->fields('p',array('word'))
         ->orderBy('word', 'ASC') // Alphabetically
         ->execute();
     return $query;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function simple_profane_filter_menu(){
+    $items = array();
+    $items['admin/config/content/simple_profane_filter'] = array(
+      'title' => 'Profane filter',
+      'description' => 'Administer Simple Profane Filter Settings',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('simple_profane_filter_admin_settings_form'),
+      'access arguments' => array('manage simple profane filter settings'),
+      'file' => 'simple_profane_filter.admin.inc',
+    );
+    return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function simple_profane_filter_permission(){
+    $perm = array(
+      'manage simple profane filter settings' => array(
+        'title' => t('Add profane words to the list'),
+        'restrict access' => TRUE,
+      ),
+      'view profane words' => array(
+        'title' => t('View profane words in block'),
+        'restrict access' => TRUE,
+      ),
+    );
+    return $perm;
+}
+
+// Database operations
+/**
+ * Check if value is already in database
+ */
+function simple_profane_filter_check($word){
+    dsm(strlen($word));
+    if (strlen($word) >= 1){
+        $result = db_query("SELECT word FROM {profane_words} WHERE word = :word", array('word' => $word))->fetchField();
+        if ($result){
+            return TRUE;
+        }
+        else {
+            return FALSE;
+        }
+    }
+    return FALSE;
+}
+
+/**
+ * Insert new values
+ */
+function simple_profane_filter_insert($word){
+    if (!simple_profane_filter_check($word)){
+        if (strlen($word) >= 1){
+            $result = db_insert('profane_words')
+                ->fields(array('word' => $word))
+                ->execute();
+        }
+    }
+}
+
+/**
+ * Delete existing values
+ */
+function simple_profane_filter_delete($word){
+    if (simple_profane_filter_check($word)){
+        $result = db_delete('profane_words')
+            ->condition('word', $word)
+            ->execute();
+    }
 }
