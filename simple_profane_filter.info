@@ -1,3 +1,5 @@
 name = Simple Profane Filter
 description = This module filters profane words and replaces them with random characters.
+package = "Custom modules"
+dependencies[] = filter
 core = 7.x

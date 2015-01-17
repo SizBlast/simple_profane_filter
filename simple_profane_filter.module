@@ -166,3 +166,44 @@ function simple_profane_filter_delete($word){
             ->execute();
     }
 }
+
+// Main functionality
+/**
+ * Replace profane words with random characters
+ */
+function simple_profane_filter_replace($text){
+    $query = simple_profane_filter_contents();
+    foreach ($query as $word) {
+        $item = '';
+        $item .= $word->word;
+        //simple_profane_filter_replace($item, $text);
+        
+        $length = strlen($item);
+    
+        $seed = str_split('!@#$%^&*()');
+        shuffle($seed); // probably optional since array_is randomized; this may be redundant
+        $rand = '';
+        foreach (array_rand($seed, $length) as $k) $rand .= $seed[$k];
+    
+        return str_ireplace($item, $rand, $text);
+    }
+}
+
+/**
+ * Implements hook_filter_info().
+ */
+function simple_profane_filter_filter_info() {
+  $filters = array();
+  $filters['Profane filter'] = array(
+    'title' => t('Remove profane words from filtered text'),
+    'process callback' => '_profane_filter',
+  );
+  return $filters;
+}
+
+/** 
+ * Filter callback for our filter.
+ */
+function _profane_filter($text, $filter, $format, $langcode, $cache, $cache_id) {
+    return simple_profane_filter_replace($text);
+}

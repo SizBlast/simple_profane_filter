@@ -37,4 +37,11 @@ function simple_profane_filter_admin_settings_form_submit($form, &$form_state){
     foreach ($delete as $item){
         simple_profane_filter_delete(rtrim($item));
     }
+    
+    /*$query = simple_profane_filter_contents();
+    foreach ($query as $word) {
+        $item = '';
+        $item .= $word->word;
+        simple_profane_filter_replace($item);
+    }*/
 }
