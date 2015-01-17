@@ -1,1 +1,25 @@
 <?php
+
+/**
+ * Implements hook_help().
+ * 
+ * Used for displayig help and module information on different (module)pages.
+ * 
+ * @param $path
+ *      Which path of the site we're using to display help
+ * @param $arg
+ *      Array that holds the curren path as returned from arg() function
+ */
+
+function simple_profane_filter_help($path, $arg) {
+    $output = '';
+    switch ($path) {
+        case 'admin/help#simple_profane_filter': // Help page
+            $output .= '<p>' . t('The Simple Profane Filter module provides a custom filter to replace any profane word with some random characters. This module is an extension of the <a href="@filter">Filter</a> module.', array('@filter' => url('admin/help/filter'))) . '</p>';
+            $output .= '<p>' . t('The Simple Profane Filter <a href="@settings">settings page</a> allows the administrator to define the words that are not welcome on the website.', array('@settings' => url('admin/config/content/simple_profane_filter'))) . '</p>';
+            return $output;
+        case 'admin/config/content/simple_profane_filter': // Settings page
+            $output .= '<p>' . t('The Simple Profane Filter module provides a custom filter to replace any profane word with some random characters. This module is an extension of the <a href="@filter">Filter</a> module.', array('@filter' => url('admin/help/filter'))) . '</p>';
+            return $output;
+    }
+}
