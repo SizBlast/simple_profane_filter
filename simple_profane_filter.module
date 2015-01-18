@@ -173,6 +173,9 @@ function simple_profane_filter_delete($word){
  */
 function simple_profane_filter_replace($text){
     $query = simple_profane_filter_contents();
+    $rands = array();
+    $items = array();
+    
     foreach ($query as $word) {
         $item = '';
         $item .= $word->word;
