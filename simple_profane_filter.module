@@ -130,7 +130,6 @@ function simple_profane_filter_permission(){
  * Check if value is already in database
  */
 function simple_profane_filter_check($word){
-    dsm(strlen($word));
     if (strlen($word) >= 1){
         $result = db_query("SELECT word FROM {profane_words} WHERE word = :word", array('word' => $word))->fetchField();
         if ($result){

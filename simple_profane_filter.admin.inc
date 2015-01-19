@@ -23,7 +23,6 @@ function simple_profane_filter_admin_settings_form_submit($form, &$form_state){
     // Profane words that need to be inserted into the database
     $add = $form_state['values']['profane_words_add'];
     $insert = explode("\n", $add);
-    dsm($insert);
     
     foreach ($insert as $item){
         simple_profane_filter_insert(rtrim($item));
@@ -32,7 +31,6 @@ function simple_profane_filter_admin_settings_form_submit($form, &$form_state){
     // Profane words that need to be deleted from the database
     $remove = $form_state['values']['profane_words_remove'];
     $delete = explode("\n", $remove);
-    dsm($delete);
     
     foreach ($delete as $item){
         simple_profane_filter_delete(rtrim($item));
